@@ -1,0 +1,9 @@
+---
+# Role metadata and dependencies
+# Requires community.docker collection: ansible-galaxy collection install community.docker
+dependencies: []
+
+galaxy_info:
+  role_name: vulnerable_docker
+  description: Deploys a misconfigured privileged Docker container for competition (container escape via host mount)
+  license: MIT

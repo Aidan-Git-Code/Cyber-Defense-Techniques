@@ -1,0 +1,10 @@
+---
+# Tasks for the common role
+# - name: Ensure packages are installed
+#   apt:
+#     name: "{{ item }}"
+#     state: present
+#     update_cache: true
+#   loop:
+#     - curl
+#     - vim

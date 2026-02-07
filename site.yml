@@ -1,0 +1,10 @@
+---
+# Main playbook - deploys privileged Docker container for competition (container escape scenario).
+# Usage: ansible-playbook site.yml
+# Prerequisites: See docs/DEPLOYMENT.md (Ansible, community.docker collection, target OS).
+
+- name: Deploy vulnerable privileged Docker container
+  hosts: docker_hosts
+  gather_facts: true
+  roles:
+    - vulnerable_docker

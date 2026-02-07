@@ -1,0 +1,19 @@
+# Ansible
+*.retry
+.vault_pass
+
+# Python
+*.pyc
+__pycache__/
+.venv/
+venv/
+env/
+
+# Editor / OS
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Optional: uncomment to ignore screenshots (assignment asks for them in repo, so leave commented)
+# screenshots/
