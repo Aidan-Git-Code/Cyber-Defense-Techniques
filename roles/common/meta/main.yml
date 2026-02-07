@@ -1,0 +1,9 @@
+---
+# Role dependencies and metadata
+# dependencies: []
+# galaxy_info:
+#   role_name: common
+#   description: Common configuration for all hosts
+#   license: MIT
+
+dependencies: []

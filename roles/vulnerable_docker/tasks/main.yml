@@ -1,0 +1,34 @@
+---
+# Tasks: deploy misconfigured privileged Docker container for competition scenario.
+# Container allows host filesystem mount from inside (container escape).
+
+- name: Install Docker dependencies and Docker packages
+  ansible.builtin.apt:
+    name:
+      - "{{ vuln_docker_package }}"
+      - "{{ vuln_docker_python_package }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+  notify: Restart Docker service
+
+- name: Ensure Docker service is started
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Pull vulnerable container image
+  community.docker.docker_image:
+    name: "{{ vuln_docker_image }}"
+    source: pull
+  # Image pull is idempotent; re-run uses existing image if present
+
+- name: Run privileged container (misconfiguration for competition)
+  community.docker.docker_container:
+    name: "{{ vuln_docker_container_name }}"
+    image: "{{ vuln_docker_image }}"
+    state: started
+    privileged: "{{ vuln_docker_privileged }}"
+    command: "{{ vuln_docker_command }}"
+  # Privileged mode required for scenario - allows host device access and mount escape from inside container

@@ -1,0 +1,21 @@
+---
+# Default variables for vulnerable_docker role (competition scenario - privileged container)
+# Override in group_vars or host_vars as needed.
+
+# Container image (must have mount/shell; ubuntu has them after apt install)
+vuln_docker_image: "ubuntu:22.04"
+
+# Container name (used in verification and exploitation docs)
+vuln_docker_container_name: "vuln-priv-container"
+
+# Privileged mode - required for competition scenario; allows host device access and mount escape
+vuln_docker_privileged: true
+
+# Command to keep container running (no SSH in container - attacker uses docker exec from host)
+vuln_docker_command: "sleep infinity"
+
+# Docker package (use docker.io from Ubuntu repos for simplicity; no external repo)
+vuln_docker_package: "docker.io"
+
+# Python Docker SDK required for Ansible docker_* modules on target
+vuln_docker_python_package: "python3-docker"
