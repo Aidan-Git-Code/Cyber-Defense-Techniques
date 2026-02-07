@@ -19,3 +19,13 @@ vuln_docker_package: "docker.io"
 
 # Python Docker SDK required for Ansible docker_* modules on target
 vuln_docker_python_package: "python3-docker"
+
+# SSH access into container (for Blue/Red team to get shell then mount escape)
+vuln_docker_enable_ssh: true
+vuln_docker_ssh_port: 2222
+vuln_docker_ssh_user: blueteam
+vuln_docker_ssh_password: "blueteam"
+
+# Built image name when SSH is enabled (built from Dockerfile in role files)
+vuln_docker_image_ssh: "vuln-priv-ssh:latest"
+vuln_docker_build_path: "/tmp/vuln_docker_build"

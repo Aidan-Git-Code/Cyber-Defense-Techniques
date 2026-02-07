@@ -1,6 +1,7 @@
 ---
 # Tasks: deploy misconfigured privileged Docker container for competition scenario.
 # Container allows host filesystem mount from inside (container escape).
+# With SSH enabled, Blue/Red team can SSH into the container on port 2222 first.
 
 - name: Install Docker dependencies and Docker packages
   ansible.builtin.apt:
@@ -18,17 +19,56 @@
     state: started
     enabled: true
 
-- name: Pull vulnerable container image
-  community.docker.docker_image:
-    name: "{{ vuln_docker_image }}"
-    source: pull
-  # Image pull is idempotent; re-run uses existing image if present
+# --- SSH path: build image with OpenSSH and weak credentials, run with port 2222:22 ---
+- name: Ensure build directory exists for SSH image
+  ansible.builtin.file:
+    path: "{{ vuln_docker_build_path }}"
+    state: directory
+    mode: "0755"
+  when: vuln_docker_enable_ssh | default(false) | bool
 
-- name: Run privileged container (misconfiguration for competition)
+- name: Copy Dockerfile for SSH image to build path
+  ansible.builtin.copy:
+    src: Dockerfile
+    dest: "{{ vuln_docker_build_path }}/Dockerfile"
+    mode: "0644"
+  when: vuln_docker_enable_ssh | default(false) | bool
+
+- name: Build vulnerable container image with SSH
+  community.docker.docker_image:
+    name: "{{ vuln_docker_image_ssh }}"
+    source: build
+    build:
+      path: "{{ vuln_docker_build_path }}"
+      args:
+        SSH_USER: "{{ vuln_docker_ssh_user }}"
+        SSH_PASSWORD: "{{ vuln_docker_ssh_password }}"
+  when: vuln_docker_enable_ssh | default(false) | bool
+
+- name: Run privileged container with SSH (port {{ vuln_docker_ssh_port }})
   community.docker.docker_container:
     name: "{{ vuln_docker_container_name }}"
-    image: "{{ vuln_docker_image }}"
+    image: "{{ vuln_docker_image_ssh }}"
     state: started
     privileged: "{{ vuln_docker_privileged }}"
-    command: "{{ vuln_docker_command }}"
-  # Privileged mode required for scenario - allows host device access and mount escape from inside container
+    published_ports:
+      - "{{ vuln_docker_ssh_port }}:22"
+  when: vuln_docker_enable_ssh | default(false) | bool
+  # Privileged mode allows host device access and mount escape from inside container
+
+
+# # --- Non-SSH path: pull base image and run with sleep infinity ---
+# - name: Pull vulnerable container image
+#   community.docker.docker_image:
+#     name: "{{ vuln_docker_image }}"
+#     source: pull
+#   when: not (vuln_docker_enable_ssh | default(false) | bool)
+
+# - name: Run privileged container without SSH (access via docker exec)
+#   community.docker.docker_container:
+#     name: "{{ vuln_docker_container_name }}"
+#     image: "{{ vuln_docker_image }}"
+#     state: started
+#     privileged: "{{ vuln_docker_privileged }}"
+#     command: "{{ vuln_docker_command }}"
+#   when: not (vuln_docker_enable_ssh | default(false) | bool)
